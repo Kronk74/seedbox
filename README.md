@@ -1,0 +1,2 @@
+# seedbox
+Automated seedbox environment
