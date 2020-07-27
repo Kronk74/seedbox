@@ -1,0 +1,75 @@
+version: "3.8"
+services:
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    user: 1000:1000
+    #network_mode: "bridge"
+    ports:
+        - "8096:8096"
+    restart: "unless-stopped"
+    volumes:
+      - ${PATH_DATA}\jellyfin\config:/config
+      - ${PATH_DATA}\jellyfin\cache:/cache
+      - ${PATH_DATA}\jellyfin\Films:/media
+    networks: 
+      - backend
+
+  ombi:
+    image: linuxserver/ombi
+    container_name: ombi
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - BASE_URL=/ombi #optional
+    volumes:
+      - ${PATH_DATA}\ombi\config:/config
+    ports:
+      - 3579:3579
+    restart: unless-stopped
+    networks:
+      - backend
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - UMASK_SET=022 #optional
+    volumes:
+      - ${PATH_DATA}\sonarr\data:/config
+      - ${PATH_DATA}\sonarr\tvseries:/tv
+      - ${PATH_DATA}\sonarr\downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - TRANSMISSION_WEB_HOME=/combustion-release/ #optional
+      - USER=JeanPed  #optional
+      - PASS=password #optional
+    volumes:
+      - ${PATH_DATA}\transmission\data:/config
+      - ${PATH_DATA}\transmission\downloads:/downloads
+      - ${PATH_DATA}\transmission\watch:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
